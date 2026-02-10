@@ -10,7 +10,6 @@ Date: 2/10/2026
 Version: 1.0
 
 Known issues:
-- will choke on a TLOxp Person Comprehensive Report
 - sometimes has issues with the last vehicle record in a file
 
 """
@@ -290,7 +289,10 @@ def process_Life(fname=None):
         vehicle_json.append(res)
         
     # save the vehicle list to a CSV file now
-    keys = vehicle_json[0].keys()
+    try:
+        keys = vehicle_json[0].keys()
+    except IndexError:
+        return # No vehicle entries
     fname = fname + ".csv"
     with open(fname, 'w', newline='') as csvout:
         dictwriter = csv.DictWriter(csvout, keys)
@@ -388,7 +390,10 @@ def process_TLO(fname=None):
         vehicle_json.append(res)
         
     # save the vehicle list to a CSV file now
-    keys = vehicle_json[0].keys()
+    try:
+        keys = vehicle_json[0].keys()
+    except IndexError:
+        return # No vehicle entries
     fname = fname + ".csv"
     with open(fname, 'w', newline='') as csvout:
         dictwriter = csv.DictWriter(csvout, keys)
@@ -422,4 +427,5 @@ def main():
             continue
         
 if __name__ == "__main__":
+
     main()
