@@ -393,9 +393,11 @@ def main():
         else:
             print(f"Unknown origin, skipping {file}.")
             continue
+    print(f"Done.")
         
 if __name__ == "__main__":
 
     main()
+
 
 
