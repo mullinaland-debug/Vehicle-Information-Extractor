@@ -8,6 +8,7 @@ It organizes the CSV with column headings for color, year, make, model, body, li
 License: GPL 3.0
 Date: 2/10/2026
 Version: 1.0
+Author: Alan Mullin
 
 Known issues:
 - sometimes has issues with the last vehicle record in a file
@@ -209,7 +210,10 @@ def build_entry_str(color="",year="",make="",model="",body="",lic_state="",lic_n
         print(f"build_entry_str(): {json_string}")
     return json_string
 
-
+'''
+process_Life() reads a pDF file, links all the pages together, breaks them up by lines, and looks for vehicle information. It assumes that the PDF coming to it could contain vehicle information.
+It applies some logic needed specifically by Liferaft formatted PDF files.
+'''
 def process_Life(fname=None):
     if fname is None:
         print(f"process_Life: file name must be specified.")
@@ -280,7 +284,9 @@ def process_Life(fname=None):
         dictwriter = csv.DictWriter(csvout, keys)
         dictwriter.writeheader()
         dictwriter.writerows(vehicle_json)        
-
+'''
+process_TLO() is just like process_Life() but has logic for the peculiarites of TLOxp formatted PDF files.
+'''
 def process_TLO(fname=None):
     if fname is None:
         print(f"process_TLO: file name must be specified.")
@@ -391,4 +397,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
