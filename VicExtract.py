@@ -231,16 +231,7 @@ def process_Life(fname=None):
         PDFText += page_text
             
     pdf_lines = PDFText.splitlines()
-    color = "UNK"
-    year = "UNK"
-    make = "UNK"
-    model = "UNK"
-    body = "UNK"
-    lic_state = "UNK"
-    lic_num = "UNK"
-    lic_exp = "UNK"
-    vin = "UNK"
-    ro_info = "UNK"
+    color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
     for l, line in enumerate(pdf_lines):
         vehicle_chunk = []
         
@@ -270,16 +261,7 @@ def process_Life(fname=None):
             vic_infile += 1
             vic_str = build_entry_str(color,year,make,model,body,lic_state,lic_num,lic_exp,vin,ro_info)
             vehicle_list.append(vic_str)
-            color = "UNK"
-            year = "UNK"
-            make = "UNK"
-            model = "UNK"
-            body = "UNK"
-            lic_state = "UNK"
-            lic_num = "UNK"
-            lic_exp = "UNK"
-            vin = "UNK"
-            ro_info = "UNK"  
+            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK" 
     
     # convert the strings to JSON
     for vic in vehicle_list:
@@ -321,17 +303,7 @@ def process_TLO(fname=None):
         PDFText += page_text
             
     pdf_lines = PDFText.splitlines()    
-    color = "UNK"
-    year = "UNK"
-    make = "UNK"
-    model = "UNK"
-    body = "UNK"
-    lic_state = "UNK"
-    lic_num = "UNK"
-    lic_exp = "UNK"
-    vin = "UNK"
-    ro_info = "UNK"
-    lic_info = "UNK"
+    color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
     for l, line in enumerate(pdf_lines):
         vehicle_chunk = []
             
@@ -370,17 +342,7 @@ def process_TLO(fname=None):
             vic_infile += 1
             vic_str = build_entry_str(color,year,make,model,body,lic_state,lic_num,lic_exp,vin,ro_info)
             vehicle_list.append(vic_str)
-            color = "UNK"
-            year = "UNK"
-            make = "UNK"
-            model = "UNK"
-            body = "UNK"
-            lic_state = "UNK"
-            lic_num = "UNK"
-            lic_exp = "UNK"
-            vin = "UNK"
-            ro_info = "UNK"
-            lic_info = "UNK"
+            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
         
     # convert the strings to JSON
     for vic in vehicle_list:
@@ -429,3 +391,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
