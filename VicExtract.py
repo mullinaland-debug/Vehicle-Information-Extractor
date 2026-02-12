@@ -73,6 +73,7 @@ def getRO(line_list=None,TLOflag=True):
                 except IndexError:
                     address = "ADDRESS_UNK"
                 reg_info = reg_info.replace('[ View Person Record ]','')
+                break
                 
     if reg_info and address:
         reg_info += ' ' + address
@@ -398,6 +399,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
