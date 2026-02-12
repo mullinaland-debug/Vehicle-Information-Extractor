@@ -233,9 +233,45 @@ def process_Life(fname=None):
     total_pages = len(reader.pages)
     for p,page in enumerate(reader.pages):
         page_text = page.extract_text()
-        PDFText += page_text
-            
+        PDFText += page_text            
     pdf_lines = PDFText.splitlines()
+    
+    # remove extranesous line
+    for line in pdf_lines:
+        if 'LICENSED INVESTIGATOR' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Page' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Weight' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'MSRP' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Height' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Width' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Wheel' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Plant:' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Fuel' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Engine' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Transmission' in line:
+            pdf_lines.remove(line)
+            continue
+    
     color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
     for l, line in enumerate(pdf_lines):
         vehicle_chunk = []
@@ -399,6 +435,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
