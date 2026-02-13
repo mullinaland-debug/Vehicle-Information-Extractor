@@ -279,10 +279,14 @@ def process_Life(fname=None):
         if "VIN: " in line: # found a Motor Vehicles entry, grab 22 lines
             ind = 0
             while ind < 23:
-                vehicle_chunk.append(pdf_lines[l+ind])
-                if bVerbose:
-                    print(f"Grabbing {pdf_lines[l+ind]}")
-                ind += 1
+                try:
+                    vehicle_chunk.append(pdf_lines[l+ind])
+                    if bVerbose:
+                        print(f"Grabbing {pdf_lines[l+ind]}")
+                    ind += 1
+                except IndexError:
+                    break
+                    
             color = getColor(vehicle_chunk)
             year = "LR_YEARUNK" # Liferaft does not contain this info
             make = "LR_MAKEUNK"
@@ -354,11 +358,14 @@ def process_TLO(fname=None):
         if "Subject" in line or "Result Found" in line: #we have hit a new vehicle record
             print(f"New vehicle entry...")
             ind = 1
-            while ind < 32:
-                vehicle_chunk.append(pdf_lines[l+ind])
-                if bVerbose:
-                    print(f"Grabbing {pdf_lines[l+ind]}")
-                ind += 1
+            try:
+                while ind < 32:
+                    vehicle_chunk.append(pdf_lines[l+ind])
+                    if bVerbose:
+                        print(f"Grabbing {pdf_lines[l+ind]}")
+                    ind += 1
+            except IndexErrror:
+                break
             
             color = getColor(vehicle_chunk)
             # get year, make, model
@@ -435,6 +442,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
