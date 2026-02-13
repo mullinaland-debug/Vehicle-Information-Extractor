@@ -358,14 +358,14 @@ def process_TLO(fname=None):
         if "Subject" in line or "Result Found" in line: #we have hit a new vehicle record
             print(f"New vehicle entry...")
             ind = 1
-            try:
-                while ind < 32:
+            while ind < 32:
+                try:
                     vehicle_chunk.append(pdf_lines[l+ind])
                     if bVerbose:
                         print(f"Grabbing {pdf_lines[l+ind]}")
                     ind += 1
-            except IndexErrror:
-                break
+                except IndexErrror:
+                    break
             
             color = getColor(vehicle_chunk)
             # get year, make, model
@@ -442,6 +442,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
