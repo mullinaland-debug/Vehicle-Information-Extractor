@@ -66,9 +66,9 @@ def getRO(line_list=None,TLOflag=True):
     else:
         for ind, line in enumerate(line_list):
             if 'tle Hol' in line:
-                # we need the next two lines
-                reg_info = line_list[ind+1]
                 try:
+                    # we need the next two lines
+                    reg_info = line_list[ind+1]
                     address = line_list[ind+2]
                 except IndexError:
                     address = "ADDRESS_UNK"
@@ -271,6 +271,8 @@ def process_Life(fname=None):
         if 'Transmission' in line:
             pdf_lines.remove(line)
             continue
+        if '-Vehicles-Search' in line:
+            pdf_lines.remove(line)
     
     color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
     for l, line in enumerate(pdf_lines):
@@ -286,7 +288,7 @@ def process_Life(fname=None):
                     ind += 1
                 except IndexError:
                     break
-                    
+
             color = getColor(vehicle_chunk)
             year = "LR_YEARUNK" # Liferaft does not contain this info
             make = "LR_MAKEUNK"
@@ -349,7 +351,46 @@ def process_TLO(fname=None):
         page_text = page.extract_text()
         PDFText += page_text
             
-    pdf_lines = PDFText.splitlines()    
+    pdf_lines = PDFText.splitlines()
+
+    # remove extranesous line
+    for line in pdf_lines:
+        if 'LICENSED INVESTIGATOR' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Page' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Weight' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'MSRP' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Height' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Width' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Wheel' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Plant:' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Fuel' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Engine' in line:
+            pdf_lines.remove(line)
+            continue
+        if 'Transmission' in line:
+            pdf_lines.remove(line)
+            continue
+        if '-Vehicles-Search' in line:
+            pdf_lines.remove(line)
+    
     color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
     for l, line in enumerate(pdf_lines):
         vehicle_chunk = []
@@ -364,7 +405,7 @@ def process_TLO(fname=None):
                     if bVerbose:
                         print(f"Grabbing {pdf_lines[l+ind]}")
                     ind += 1
-                except IndexErrror:
+                except IndexError:
                     break
             
             color = getColor(vehicle_chunk)
@@ -373,9 +414,19 @@ def process_TLO(fname=None):
             if 'Page' in string:
                 string = vehicle_chunk[1] # had a page break right before the vehicle info            
             string = string.split()
-            year = string[0] # 2014
-            make = string[1] # CHEVROLET
-            model = string[2] # MALIBU
+            try:
+                year = string[0] # 2014
+            except IndexError:
+                year = "YR_UNK"
+            try:
+                make = string[1] # CHEVROLET
+            except IndexError:
+                make = "MK_UNK"
+            try:
+                model = string[2] # MALIBU
+            except IndexError:
+                model = "MD_UNK"
+            
             body = getBody(vehicle_chunk)
             lic_info = getPlate(vehicle_chunk, True)
             if lic_info != "PLATE_UNK":
@@ -442,8 +493,6 @@ def main():
 if __name__ == "__main__":
 
     main()
-
-
 
 
 
