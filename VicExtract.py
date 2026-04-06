@@ -313,15 +313,10 @@ def process_Life(fname=None):
 
             vic_infile += 1
             vic_str = '{ \"color\": \"' + color + '\"' + ', \"year" : \"' + year + '\"' + ', \"make\" : \"' + make + '\"' + ', \"model\" : \"' + model + '\"' + ', \"body\" : \"' + body + '\"' + ', \"lic_state\" : \"' + lic_state + '\"' + ', \"lic_num\" : \"' + lic_num + '\"' + ', \"lic_exp\" : \"' + lic_exp + '\"' + ', \"vin\" : \"' + vin + '\"' + ', \"registered_owner\" : \"' + ro_info + '\"' + '}'
-            vehicle_list.append(vic_str)
-            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK" 
-    
-    # convert the strings to JSON
-    for vic in vehicle_list:
-        if bVerbose:
-            print(f"process_Life(): Adding {vic}...")
-        res = json.loads(vic)
-        vehicle_json.append(res)
+            if bVerbose:
+                print(f"process_TLO(): Adding {vic_str}...")
+            vehicle_json.append(json.loads(vic_str))
+            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
         
     # save the vehicle list to a CSV file now
     try:
@@ -462,15 +457,10 @@ def process_TLO(fname=None):
             
             vic_infile += 1
             vic_str = '{ \"color\": \"' + color + '\"' + ', \"year" : \"' + year + '\"' + ', \"make\" : \"' + make + '\"' + ', \"model\" : \"' + model + '\"' + ', \"body\" : \"' + body + '\"' + ', \"lic_state\" : \"' + lic_state + '\"' + ', \"lic_num\" : \"' + lic_num + '\"' + ', \"lic_exp\" : \"' + lic_exp + '\"' + ', \"vin\" : \"' + vin + '\"' + ', \"registered_owner\" : \"' + ro_info + '\"' + '}'
-            vehicle_list.append(vic_str)
-            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
-        
-    # convert the strings to JSON
-    for vic in vehicle_list:
-        if bVerbose:
-            print(f"process_TLO(): Adding {vic}...")
-        res = json.loads(vic)
-        vehicle_json.append(res)
+            if bVerbose:
+                print(f"process_TLO(): Adding {vic_str}...")
+            vehicle_json.append(json.loads(vic_str))
+            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"        
         
     # save the vehicle list to a CSV file now
     try:
