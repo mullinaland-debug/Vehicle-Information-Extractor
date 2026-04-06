@@ -230,6 +230,10 @@ def process_Life(fname=None):
     vic_infile = 0
     print(f"Scraping {fname}...")
     reader = PdfReader(fname) # PDF File
+    # make sure it's Liferaft
+    first_page = reader.pages[0].extract_text()
+    if "liferaft" not in first_page:
+        return False
         
     # Stich all the pages into a long string, and then make it a list of strings
     total_pages = len(reader.pages)
@@ -340,7 +344,7 @@ def process_TLO(fname=None):
     if fname is None:
         print(f"process_TLO: file name must be specified.")
         exit(1)
-    
+     
     vehicle_list = []
     vehicle_json = []
     vic_total = 0
@@ -350,6 +354,15 @@ def process_TLO(fname=None):
     vic_infile = 0
     print(f"Scraping {fname}...")
     reader = PdfReader(fname) # PDF File
+    
+    #Make sure it's a TLOxp generated file
+    first_page = reader.pages[0].extract_text()
+    if "liferaft" in first_page:
+        return process_Life(file)
+    if "INVESTIGATOR PURPOSES" not in first_page:
+        # Not TLOxp or Liferaft, bail out
+        print(f"Unknown File type {fname}.")
+        return False
         
     # Stitch all the pages into a long string
     total_pages = len(reader.pages)
@@ -403,7 +416,8 @@ def process_TLO(fname=None):
             
         # Look for what we want
         if "Subject" in line or "Result Found" in line: #we have hit a new vehicle record
-            print(f"New vehicle entry...")
+            if bVerbose:
+                print(f"New vehicle entry...")
             ind = 1
             while ind < 32:
                 try:
@@ -487,13 +501,9 @@ def is_TLO(file):
         return False
         
 def process_file_wrapper(file):
-    if is_liferaft(file):
-        return process_Life(file)
-    if is_TLO(file):
-        return process_TLO(file)
-    else:
-        print(f"Unknown file type.")
-        return False
+    TLO = process_TLO(file)
+    
+    return TLO
         
 def main():
     start = datetime.datetime.now()
@@ -511,8 +521,3 @@ def main():
         
 if __name__ == "__main__":
     main()
-
-
-
-
-
