@@ -4,10 +4,11 @@ VicExtract.py will pull COLOR, YEAR, MAKE, MODEL, BODY, LICENSE STATE,LICENSE NU
 Loops through all PDFs in a folder and creates a CSV with the same name. Ex: info.pdf becomes info.pdf.csv
 
 It organizes the CSV with column headings for color, year, make, model, body, license state, lincense number, license expiration, VIN, and Registered Owner
+Using ProcessPoolExecutor is the major improvment for v2.0
 
 License: GPL 3.0
-Date: 2/10/2026
-Version: 1.0
+Date: 4/6/2026
+Version: 2.0
 Author: Alan Mullin
 
 Known issues:
@@ -15,7 +16,8 @@ Known issues:
 
 """
 from pypdf import PdfReader
-import os, argparse, sys, json,csv
+from concurrent.futures import ProcessPoolExecutor 
+import os, argparse, sys, json, csv, datetime
 
 bVerbose = False
 
@@ -326,11 +328,15 @@ def process_Life(fname=None):
     with open(fname, 'w', newline='') as csvout:
         dictwriter = csv.DictWriter(csvout, keys)
         dictwriter.writeheader()
-        dictwriter.writerows(vehicle_json)        
+        dictwriter.writerows(vehicle_json)  
+
+    return True
+    
 '''
 process_TLO() is just like process_Life() but has logic for the peculiarites of TLOxp formatted PDF files.
 '''
 def process_TLO(fname=None):
+    start = datetime.datetime.now()
     if fname is None:
         print(f"process_TLO: file name must be specified.")
         exit(1)
@@ -462,36 +468,48 @@ def process_TLO(fname=None):
         dictwriter = csv.DictWriter(csvout, keys)
         dictwriter.writeheader()
         dictwriter.writerows(vehicle_json)
+    
+    print(f"process_TLO: elapsed time {datetime.datetime.now() - start}")
+    return True
 
+def is_liferaft(file):
+    if "liferaft" in first_page:
+        print(f"Liferaft document.")
+        return True
+    else:
+        return False
+
+def is_TLO(file):
+    if "INVESTIGATOR PURPOSES" in first_page:
+        print(f"TLOxp document.")
+        return True
+    else:
+        return False
+        
+def process_file_wrapper(file):
+    if is_liferaft(file):
+        return process_Life(file)
+    if is_TLO(file):
+        return process_TLO(file)
+    else:
+        print(f"Unknown file type.")
+        return False
         
 def main():
+    start = datetime.datetime.now()
     file_list = []
     
     # Get my list of PDFs
-    for f in os.listdir():
-        if f.endswith(".pdf"):
-            file_list.append(f)
-    
+    file_list = [f for f in os.listdir() if f.endswith(".pdf")]
     file_list = sorted(file_list)
     
-    for file in file_list:
-        reader = PdfReader(file)
-        first_page = reader.pages[0].extract_text()
-        if "liferaft" in first_page:
-            print(f"Liferaft document.")
-            process_Life(file)
-            continue
-        if "INVESTIGATOR PURPOSES" in first_page:
-            print(f"TLOxp document.")
-            process_TLO(file)
-            continue
-        else:
-            print(f"Unknown origin, skipping {file}.")
-            continue
+    with ProcessPoolExecutor() as executor:
+        executor.map(process_file_wrapper, file_list)
+
     print(f"Done.")
+    print(f"Elapsed time: {datetime.datetime.now() - start}")
         
 if __name__ == "__main__":
-
     main()
 
 
