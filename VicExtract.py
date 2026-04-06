@@ -312,7 +312,7 @@ def process_Life(fname=None):
             ro_info = getRO(vehicle_chunk, False)
 
             vic_infile += 1
-            vic_str = build_entry_str(color,year,make,model,body,lic_state,lic_num,lic_exp,vin,ro_info)
+            vic_str = '{ \"color\": \"' + color + '\"' + ', \"year" : \"' + year + '\"' + ', \"make\" : \"' + make + '\"' + ', \"model\" : \"' + model + '\"' + ', \"body\" : \"' + body + '\"' + ', \"lic_state\" : \"' + lic_state + '\"' + ', \"lic_num\" : \"' + lic_num + '\"' + ', \"lic_exp\" : \"' + lic_exp + '\"' + ', \"vin\" : \"' + vin + '\"' + ', \"registered_owner\" : \"' + ro_info + '\"' + '}'
             vehicle_list.append(vic_str)
             color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK" 
     
@@ -461,7 +461,7 @@ def process_TLO(fname=None):
             ro_info = getRO(vehicle_chunk,True)
             
             vic_infile += 1
-            vic_str = build_entry_str(color,year,make,model,body,lic_state,lic_num,lic_exp,vin,ro_info)
+            vic_str = '{ \"color\": \"' + color + '\"' + ', \"year" : \"' + year + '\"' + ', \"make\" : \"' + make + '\"' + ', \"model\" : \"' + model + '\"' + ', \"body\" : \"' + body + '\"' + ', \"lic_state\" : \"' + lic_state + '\"' + ', \"lic_num\" : \"' + lic_num + '\"' + ', \"lic_exp\" : \"' + lic_exp + '\"' + ', \"vin\" : \"' + vin + '\"' + ', \"registered_owner\" : \"' + ro_info + '\"' + '}'
             vehicle_list.append(vic_str)
             color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
         
