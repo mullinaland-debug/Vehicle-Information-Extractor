@@ -4,10 +4,9 @@ VicExtract.py will pull COLOR, YEAR, MAKE, MODEL, BODY, LICENSE STATE,LICENSE NU
 Loops through all PDFs in a folder and creates a CSV with the same name. Ex: info.pdf becomes info.pdf.csv
 
 It organizes the CSV with column headings for color, year, make, model, body, license state, lincense number, license expiration, VIN, and Registered Owner
-Using ProcessPoolExecutor is the major improvment for v2.0
 
 License: GPL 3.0
-Date: 4/6/2026
+Date: 4/14/2026
 Version: 2.0
 Author: Alan Mullin
 
@@ -16,8 +15,7 @@ Known issues:
 
 """
 from pypdf import PdfReader
-from concurrent.futures import ProcessPoolExecutor 
-import os, argparse, sys, json, csv, datetime
+import os, argparse, sys, json,csv
 
 bVerbose = False
 
@@ -197,18 +195,8 @@ def build_entry_str(color="",year="",make="",model="",body="",lic_state="",lic_n
     if lic_exp == 'Information':
         lic_exp = '1/1/1800'
     
-    # we have a complete entry
-    json_string = '{ \"color\": \"' + color + '\"'
-    json_string += ', \"year" : \"' + year + '\"'
-    json_string += ', \"make\" : \"' + make + '\"'
-    json_string += ', \"model\" : \"' + model + '\"'
-    json_string += ', \"body\" : \"' + body + '\"'
-    json_string += ', \"lic_state\" : \"' + lic_state + '\"'
-    json_string += ', \"lic_num\" : \"' + lic_num + '\"'
-    json_string += ', \"lic_exp\" : \"' + lic_exp + '\"'
-    json_string += ', \"vin\" : \"' + vin + '\"'
-    json_string += ', \"registered_owner\" : \"' + ro_info + '\"'
-    json_string += '}'
+    json_string = f'{{ "color" : "{color}", "year" : "{year}", "make" : "{make}", "model" : "{model}", "body" : "{body}", "lic_state" : "{lic_state}", "lic_num" : "{lic_num}", "lic_exp" : "{lic_exp}", "vin" : "{vin}", "registered_owner" : "{ro_info}" }}'
+    
     if bVerbose:
         print(f"build_entry_str(): {json_string}")
     return json_string
@@ -230,10 +218,6 @@ def process_Life(fname=None):
     vic_infile = 0
     print(f"Scraping {fname}...")
     reader = PdfReader(fname) # PDF File
-    # make sure it's Liferaft
-    first_page = reader.pages[0].extract_text()
-    if "liferaft" not in first_page:
-        return False
         
     # Stich all the pages into a long string, and then make it a list of strings
     total_pages = len(reader.pages)
@@ -312,11 +296,20 @@ def process_Life(fname=None):
             ro_info = getRO(vehicle_chunk, False)
 
             vic_infile += 1
-            vic_str = '{ \"color\": \"' + color + '\"' + ', \"year" : \"' + year + '\"' + ', \"make\" : \"' + make + '\"' + ', \"model\" : \"' + model + '\"' + ', \"body\" : \"' + body + '\"' + ', \"lic_state\" : \"' + lic_state + '\"' + ', \"lic_num\" : \"' + lic_num + '\"' + ', \"lic_exp\" : \"' + lic_exp + '\"' + ', \"vin\" : \"' + vin + '\"' + ', \"registered_owner\" : \"' + ro_info + '\"' + '}'
+            vic_str = f'{{ "color" : "{color}", "year" : "{year}", "make" : "{make}", "model" : "{model}", "body" : "{body}", "lic_state" : "{lic_state}", "lic_num" : "{lic_num}", "lic_exp" : "{lic_exp}", "vin" : "{vin}", "registered_owner" : "{ro_info}" }}'
+            
             if bVerbose:
-                print(f"process_TLO(): Adding {vic_str}...")
-            vehicle_json.append(json.loads(vic_str))
-            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
+                print(f"{vic_str}")
+            
+            vehicle_list.append(vic_str)
+            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK" 
+    
+    # convert the strings to JSON
+    for vic in vehicle_list:
+        if bVerbose:
+            print(f"process_Life(): Adding {vic}...")
+        res = json.loads(vic)
+        vehicle_json.append(res)
         
     # save the vehicle list to a CSV file now
     try:
@@ -327,19 +320,15 @@ def process_Life(fname=None):
     with open(fname, 'w', newline='') as csvout:
         dictwriter = csv.DictWriter(csvout, keys)
         dictwriter.writeheader()
-        dictwriter.writerows(vehicle_json)  
-
-    return True
-    
+        dictwriter.writerows(vehicle_json)        
 '''
 process_TLO() is just like process_Life() but has logic for the peculiarites of TLOxp formatted PDF files.
 '''
 def process_TLO(fname=None):
-    start = datetime.datetime.now()
     if fname is None:
         print(f"process_TLO: file name must be specified.")
         exit(1)
-     
+    
     vehicle_list = []
     vehicle_json = []
     vic_total = 0
@@ -349,15 +338,6 @@ def process_TLO(fname=None):
     vic_infile = 0
     print(f"Scraping {fname}...")
     reader = PdfReader(fname) # PDF File
-    
-    #Make sure it's a TLOxp generated file
-    first_page = reader.pages[0].extract_text()
-    if "liferaft" in first_page:
-        return process_Life(file)
-    if "INVESTIGATOR PURPOSES" not in first_page:
-        # Not TLOxp or Liferaft, bail out
-        print(f"Unknown File type {fname}.")
-        return False
         
     # Stitch all the pages into a long string
     total_pages = len(reader.pages)
@@ -411,8 +391,7 @@ def process_TLO(fname=None):
             
         # Look for what we want
         if "Subject" in line or "Result Found" in line: #we have hit a new vehicle record
-            if bVerbose:
-                print(f"New vehicle entry...")
+            print(f"New vehicle entry...")
             ind = 1
             while ind < 32:
                 try:
@@ -456,11 +435,20 @@ def process_TLO(fname=None):
             ro_info = getRO(vehicle_chunk,True)
             
             vic_infile += 1
-            vic_str = '{ \"color\": \"' + color + '\"' + ', \"year" : \"' + year + '\"' + ', \"make\" : \"' + make + '\"' + ', \"model\" : \"' + model + '\"' + ', \"body\" : \"' + body + '\"' + ', \"lic_state\" : \"' + lic_state + '\"' + ', \"lic_num\" : \"' + lic_num + '\"' + ', \"lic_exp\" : \"' + lic_exp + '\"' + ', \"vin\" : \"' + vin + '\"' + ', \"registered_owner\" : \"' + ro_info + '\"' + '}'
+            vic_str = f'{{ "color" : "{color}", "year" : "{year}", "make" : "{make}", "model" : "{model}", "body" : "{body}", "lic_state" : "{lic_state}", "lic_num" : "{lic_num}", "lic_exp" : "{lic_exp}", "vin" : "{vin}", "registered_owner" : "{ro_info}" }}'
+            
             if bVerbose:
-                print(f"process_TLO(): Adding {vic_str}...")
-            vehicle_json.append(json.loads(vic_str))
-            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"        
+                print(f"{vic_str}")
+            
+            vehicle_list.append(vic_str)
+            color = year = make = model = body = lic_state = lic_num = lic_exp = vin = ro_info = "UNK"
+        
+    # convert the strings to JSON
+    for vic in vehicle_list:
+        if bVerbose:
+            print(f"process_TLO(): Adding {vic}...")
+        res = json.loads(vic)
+        vehicle_json.append(res)
         
     # save the vehicle list to a CSV file now
     try:
@@ -472,42 +460,33 @@ def process_TLO(fname=None):
         dictwriter = csv.DictWriter(csvout, keys)
         dictwriter.writeheader()
         dictwriter.writerows(vehicle_json)
-    
-    print(f"process_TLO: elapsed time {datetime.datetime.now() - start}")
-    return True
 
-def is_liferaft(file):
-    if "liferaft" in first_page:
-        print(f"Liferaft document.")
-        return True
-    else:
-        return False
-
-def is_TLO(file):
-    if "INVESTIGATOR PURPOSES" in first_page:
-        print(f"TLOxp document.")
-        return True
-    else:
-        return False
-        
-def process_file_wrapper(file):
-    TLO = process_TLO(file)
-    
-    return TLO
         
 def main():
-    start = datetime.datetime.now()
     file_list = []
     
     # Get my list of PDFs
-    file_list = [f for f in os.listdir() if f.endswith(".pdf")]
+    for f in os.listdir():
+        if f.endswith(".pdf"):
+            file_list.append(f)
+    
     file_list = sorted(file_list)
     
-    with ProcessPoolExecutor() as executor:
-        executor.map(process_file_wrapper, file_list)
-
+    for file in file_list:
+        reader = PdfReader(file)
+        first_page = reader.pages[0].extract_text()
+        if "liferaft" in first_page:
+            print(f"Liferaft document.")
+            process_Life(file)
+            continue
+        if "INVESTIGATOR PURPOSES" in first_page:
+            print(f"TLOxp document.")
+            process_TLO(file)
+            continue
+        else:
+            print(f"Unknown origin, skipping {file}.")
+            continue
     print(f"Done.")
-    print(f"Elapsed time: {datetime.datetime.now() - start}")
         
 if __name__ == "__main__":
     main()
